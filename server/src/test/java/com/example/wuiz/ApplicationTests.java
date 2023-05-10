@@ -4,6 +4,8 @@ import com.example.wuiz.quiz.Option;
 import com.example.wuiz.quiz.Question;
 import com.example.wuiz.quiz.Quiz;
 import com.example.wuiz.quiz.QuizRepository;
+import com.example.wuiz.quiz.request.SubmitRequest;
+import com.example.wuiz.result.ResultRepository;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.AfterEach;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -23,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ApplicationTests {
   @Autowired TestRestTemplate restTemplate;
   @Autowired QuizRepository quizRepository;
+  @Autowired ResultRepository resultRepository;
   Quiz quiz;
 
   @BeforeEach
@@ -35,7 +39,8 @@ class ApplicationTests {
             Option.builder().text("3").build(),
             correctOption);
 
-    Question question = Question.builder().text("2 + 2 = ?").options(options).build();
+    Question question =
+        Question.builder().text("2 + 2 = ?").options(options).correctOption(correctOption).build();
     options.forEach(o -> o.setQuestion(question));
 
     List<Question> questions = List.of(question);
@@ -47,7 +52,20 @@ class ApplicationTests {
 
   @AfterEach
   void afterEach() {
-    quizRepository.deleteById(quiz.getId());
+    resultRepository.deleteAll();
+    quizRepository.deleteAll();
+  }
+
+  @Test
+  void shouldReturnAllQuizzes() {
+    ResponseEntity<String> res = restTemplate.getForEntity("/quizzes", String.class);
+    assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    DocumentContext documentContext = JsonPath.parse(res.getBody());
+    Number id = documentContext.read("$[0].id");
+    String title = documentContext.read("$[0].title");
+    assertThat(id).isEqualTo(quiz.getId());
+    assertThat(title).isEqualTo(quiz.getTitle());
   }
 
   @Test
@@ -67,5 +85,35 @@ class ApplicationTests {
   void shouldReturn404WhenQuizNotExists() {
     ResponseEntity<String> res = restTemplate.getForEntity("/quizzes/99", String.class);
     assertThat(res.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+  }
+
+  @Test
+  void shouldReturnResultWith100Score() {
+    SubmitRequest.Answer answer = new SubmitRequest.Answer(quiz.getQuestions().get(0).getId(), "4");
+    SubmitRequest submitRequest = new SubmitRequest(quiz.getId(), "test", List.of(answer));
+
+    HttpEntity<SubmitRequest> request = new HttpEntity<>(submitRequest);
+    ResponseEntity<String> res =
+        this.restTemplate.postForEntity("/quizzes/submit", request, String.class);
+
+    DocumentContext documentContext = JsonPath.parse(res.getBody());
+    int score = documentContext.read("$.score");
+
+    assertThat(score).isEqualTo(100);
+  }
+
+  @Test
+  void shouldReturnResultWith0Score() {
+    SubmitRequest.Answer answer = new SubmitRequest.Answer(quiz.getQuestions().get(0).getId(), "1");
+    SubmitRequest submitRequest = new SubmitRequest(quiz.getId(), "test", List.of(answer));
+
+    HttpEntity<SubmitRequest> request = new HttpEntity<>(submitRequest);
+    ResponseEntity<String> res =
+        this.restTemplate.postForEntity("/quizzes/submit", request, String.class);
+
+    DocumentContext documentContext = JsonPath.parse(res.getBody());
+    int score = documentContext.read("$.score");
+
+    assertThat(score).isEqualTo(0);
   }
 }
