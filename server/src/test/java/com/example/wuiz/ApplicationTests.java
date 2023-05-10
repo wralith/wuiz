@@ -8,15 +8,16 @@ import com.example.wuiz.quiz.request.SubmitRequest;
 import com.example.wuiz.result.ResultRepository;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 
 import java.util.List;
 
@@ -142,5 +143,43 @@ class ApplicationTests {
     score = documentContext.read("$.score");
     assertThat(owner).isEqualTo("test");
     assertThat(score).isEqualTo(100);
+  }
+
+  @Test
+  void shouldCreateQuizAndReturnCreatedQuiz() throws JSONException {
+    var json = new JSONObject();
+    json.put("title", "Create quiz test");
+
+    var questionJson = new JSONObject();
+    questionJson.put("text", "What is the first letter in alphabet?");
+
+    var questionsJson = new JSONArray();
+
+    var optionsJson = new JSONArray();
+    optionsJson.put(new JSONObject().put("text", "a"));
+    optionsJson.put(new JSONObject().put("text", "g"));
+    optionsJson.put(new JSONObject().put("text", "z"));
+
+    questionJson.put("options", optionsJson);
+    questionJson.put("correctOption", new JSONObject().put("text", "a"));
+
+    questionsJson.put(questionJson);
+    json.put("questions", questionsJson);
+
+    var headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    var res =
+        restTemplate.postForEntity(
+            "/quizzes", new HttpEntity<>(json.toString(), headers), String.class);
+    assertThat(res.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    var documentContext = JsonPath.parse(res.getBody());
+
+    res = restTemplate.getForEntity("/quizzes/" + documentContext.read("$.id"), String.class);
+    assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
+    documentContext = JsonPath.parse(res.getBody());
+    var title = documentContext.read("$.title");
+    var questions = (List<?>) documentContext.read("$.questions");
+    assertThat(title).isEqualTo("Create quiz test");
+    assertThat(questions.size()).isEqualTo(1);
   }
 }

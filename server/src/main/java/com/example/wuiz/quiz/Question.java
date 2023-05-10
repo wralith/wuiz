@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,9 +29,14 @@ public class Question {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<Option> options;
+    @Builder.Default
+    private List<Option> options = new ArrayList<>();
 
     @JsonIgnore
     @OneToOne
     private Option correctOption;
+
+    public void addOption(Option option) {
+        options.add(option);
+    }
 }

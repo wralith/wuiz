@@ -1,9 +1,12 @@
 package com.example.wuiz.quiz;
 
 import com.example.wuiz.quiz.exception.QuizNotFoundException;
+import com.example.wuiz.quiz.request.CreateQuizRequest;
 import com.example.wuiz.quiz.request.SubmitRequest;
 import com.example.wuiz.result.Result;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +31,14 @@ public class QuizController {
   }
 
   @PostMapping("/submit")
-  public ResponseEntity<Result> submit(@RequestBody SubmitRequest request) throws QuizNotFoundException {
+  public ResponseEntity<Result> submit(@Valid @RequestBody SubmitRequest request)
+      throws QuizNotFoundException {
     Result result = service.submit(request);
     return ResponseEntity.ok(result);
+  }
+
+  @PostMapping
+  public ResponseEntity<Quiz> create(@Valid @RequestBody CreateQuizRequest request) {
+    return new ResponseEntity<>(service.createQuiz(request), HttpStatus.CREATED);
   }
 }
