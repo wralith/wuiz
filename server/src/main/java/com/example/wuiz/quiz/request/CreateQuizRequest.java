@@ -16,23 +16,23 @@ public class CreateQuizRequest {
   @Size(min = 5, max = 120)
   private String title;
 
-  @NotEmpty private List<Question> questions;
+  @NotEmpty private List<CreateQuizRequestQuestion> questions;
 
   @Getter
   @Setter
   @AllArgsConstructor
   @NoArgsConstructor
-  public static class Question {
+  public static class CreateQuizRequestQuestion {
     private String text;
-    private List<Option> options;
-    private Option correctOption;
+    private List<CreateQuizRequestOption> options;
+    private CreateQuizRequestOption correctOption;
   }
 
   @Getter
   @Setter
   @AllArgsConstructor
   @NoArgsConstructor
-  public static class Option {
+  public static class CreateQuizRequestOption {
     private String text;
   }
 }

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class ResultService {
-  ResultRepository repository;
+  private ResultRepository repository;
 
   public Optional<Result> findById(int id) {
       return repository.findById(id);

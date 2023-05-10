@@ -1,8 +1,10 @@
 package com.example.wuiz.quiz;
 
+import com.example.wuiz.quiz.converter.QuizDtoConverter;
 import com.example.wuiz.quiz.exception.QuizNotFoundException;
 import com.example.wuiz.quiz.request.CreateQuizRequest;
 import com.example.wuiz.quiz.request.SubmitRequest;
+import com.example.wuiz.quiz.response.QuizResponse;
 import com.example.wuiz.result.Result;
 import com.example.wuiz.result.ResultService;
 import jakarta.validation.Valid;
@@ -11,30 +13,34 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class QuizService {
-  QuizRepository quizRepository;
-  ResultService resultService;
+  private QuizRepository quizRepository;
+  private ResultService resultService;
+  private QuizDtoConverter converter;
 
-  public List<Quiz> findAll() {
-    return quizRepository.findAll();
+  public List<QuizResponse> findAll() {
+    return quizRepository.findAll().stream()
+        .map(converter::quizToResponse)
+        .collect(Collectors.toList());
   }
 
-  public Optional<Quiz> findById(Integer id) {
-    return quizRepository.findById(id);
+  public Optional<QuizResponse> findById(Integer id) {
+    return quizRepository.findById(id).map(converter::quizToResponse);
   }
 
   public Result submit(SubmitRequest dto) throws QuizNotFoundException {
-    Quiz quiz = this.findById(dto.getQuizId()).orElseThrow(QuizNotFoundException::new);
+    Quiz quiz = quizRepository.findById(dto.getQuizId()).orElseThrow(QuizNotFoundException::new);
     int maxScore = 100; // INFO: Will be replaced with something makes sense
     int oneQuestionWeight = maxScore / quiz.getQuestions().size();
 
     return resultService.createResult(dto, quiz, oneQuestionWeight);
   }
 
-  public Quiz createQuiz(@Valid CreateQuizRequest dto) {
+  public QuizResponse createQuiz(@Valid CreateQuizRequest dto) {
     var quiz = Quiz.builder().title(dto.getTitle()).build();
 
     dto.getQuestions()
@@ -48,7 +54,7 @@ public class QuizService {
                     question.addOption(option);
 
                     if (option.getText().equals(dtoQuestion.getCorrectOption().getText())) {
-                        question.setCorrectOption(option);
+                      question.setCorrectOption(option);
                     }
                   });
 
@@ -56,6 +62,6 @@ public class QuizService {
             });
 
     quizRepository.save(quiz);
-    return quiz;
+    return converter.quizToResponse(quiz);
   }
 }

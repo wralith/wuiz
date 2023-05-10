@@ -90,7 +90,7 @@ class ApplicationTests {
 
   @Test
   void shouldReturnResultWith100Score() {
-    SubmitRequest.Answer answer = new SubmitRequest.Answer(quiz.getQuestions().get(0).getId(), "4");
+    SubmitRequest.SubmitRequestAnswer answer = new SubmitRequest.SubmitRequestAnswer(quiz.getQuestions().get(0).getId(), "4");
     SubmitRequest submitRequest = new SubmitRequest(quiz.getId(), "test", List.of(answer));
 
     HttpEntity<SubmitRequest> request = new HttpEntity<>(submitRequest);
@@ -105,7 +105,7 @@ class ApplicationTests {
 
   @Test
   void shouldReturnResultWith0Score() {
-    SubmitRequest.Answer answer = new SubmitRequest.Answer(quiz.getQuestions().get(0).getId(), "1");
+    SubmitRequest.SubmitRequestAnswer answer = new SubmitRequest.SubmitRequestAnswer(quiz.getQuestions().get(0).getId(), "1");
     SubmitRequest submitRequest = new SubmitRequest(quiz.getId(), "test", List.of(answer));
 
     HttpEntity<SubmitRequest> request = new HttpEntity<>(submitRequest);
@@ -120,7 +120,7 @@ class ApplicationTests {
 
   @Test
   void shouldReturnResultForOwnerAndReturnResultForResultId() {
-    SubmitRequest.Answer answer = new SubmitRequest.Answer(quiz.getQuestions().get(0).getId(), "4");
+    SubmitRequest.SubmitRequestAnswer answer = new SubmitRequest.SubmitRequestAnswer(quiz.getQuestions().get(0).getId(), "4");
     SubmitRequest submitRequest = new SubmitRequest(quiz.getId(), "test", List.of(answer));
     this.restTemplate.postForEntity(
         "/quizzes/submit", new HttpEntity<>(submitRequest), String.class);

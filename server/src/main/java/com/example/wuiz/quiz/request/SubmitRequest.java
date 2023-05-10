@@ -13,12 +13,12 @@ import java.util.List;
 public class SubmitRequest {
   private Integer quizId;
   @NotBlank private String owner;
-  private List<Answer> answers;
+  private List<SubmitRequestAnswer> answers;
 
   @Getter
   @Setter
   @AllArgsConstructor
-  public static class Answer {
+  public static class SubmitRequestAnswer {
     private Integer questionId;
     private String answer;
   }
