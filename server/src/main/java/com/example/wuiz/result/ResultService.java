@@ -17,6 +17,14 @@ import java.util.stream.Collectors;
 public class ResultService {
   ResultRepository repository;
 
+  public Optional<Result> findById(int id) {
+      return repository.findById(id);
+  }
+
+  public List<Result> findByOwner(String owner) {
+      return repository.findByOwner(owner);
+  }
+
   public Result createResult(SubmitRequest dto, Quiz quiz, int oneQuestionWeight) {
     Result result = new Result();
     result.setQuiz(quiz);

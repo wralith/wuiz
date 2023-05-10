@@ -116,4 +116,31 @@ class ApplicationTests {
 
     assertThat(score).isEqualTo(0);
   }
+
+  @Test
+  void shouldReturnResultForOwnerAndReturnResultForResultId() {
+    SubmitRequest.Answer answer = new SubmitRequest.Answer(quiz.getQuestions().get(0).getId(), "4");
+    SubmitRequest submitRequest = new SubmitRequest(quiz.getId(), "test", List.of(answer));
+    this.restTemplate.postForEntity(
+        "/quizzes/submit", new HttpEntity<>(submitRequest), String.class);
+
+    ResponseEntity<String> res = restTemplate.getForEntity("/results/owner/test", String.class);
+    assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    DocumentContext documentContext = JsonPath.parse(res.getBody());
+    int id = documentContext.read("$[0].id");
+    String owner = documentContext.read("$[0].owner");
+    int score = documentContext.read("$[0].score");
+    assertThat(owner).isEqualTo("test");
+    assertThat(score).isEqualTo(100);
+
+    // getById
+    res = restTemplate.getForEntity("/results/" + id, String.class);
+    assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
+    documentContext = JsonPath.parse(res.getBody());
+    owner = documentContext.read("$.owner");
+    score = documentContext.read("$.score");
+    assertThat(owner).isEqualTo("test");
+    assertThat(score).isEqualTo(100);
+  }
 }
