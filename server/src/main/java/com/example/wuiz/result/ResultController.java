@@ -1,15 +1,13 @@
 package com.example.wuiz.result;
 
 import com.example.wuiz.result.response.ResultResponse;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
@@ -29,8 +27,6 @@ public class ResultController {
 
   @GetMapping("/owner/{owner}")
   public List<ResultResponse> findByOwner(@PathVariable String owner) {
-    return service.findByOwner(owner).stream()
-        .map(ResultResponse::new)
-        .collect(Collectors.toList());
+    return service.findByOwner(owner).stream().map(ResultResponse::new).toList();
   }
 }

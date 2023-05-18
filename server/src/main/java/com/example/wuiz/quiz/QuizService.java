@@ -8,12 +8,10 @@ import com.example.wuiz.quiz.response.QuizResponse;
 import com.example.wuiz.result.Result;
 import com.example.wuiz.result.ResultService;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
@@ -23,9 +21,7 @@ public class QuizService {
   private QuizDtoConverter converter;
 
   public List<QuizResponse> findAll() {
-    return quizRepository.findAll().stream()
-        .map(converter::quizToResponse)
-        .collect(Collectors.toList());
+    return quizRepository.findAll().stream().map(converter::quizToResponse).toList();
   }
 
   public Optional<QuizResponse> findById(Integer id) {

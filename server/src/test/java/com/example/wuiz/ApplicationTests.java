@@ -1,5 +1,7 @@
 package com.example.wuiz;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.wuiz.quiz.Option;
 import com.example.wuiz.quiz.Question;
 import com.example.wuiz.quiz.Quiz;
@@ -8,6 +10,7 @@ import com.example.wuiz.quiz.request.SubmitRequest;
 import com.example.wuiz.result.ResultRepository;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,10 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ApplicationTests {
@@ -115,7 +114,7 @@ class ApplicationTests {
     DocumentContext documentContext = JsonPath.parse(res.getBody());
     int score = documentContext.read("$.score");
 
-    assertThat(score).isEqualTo(0);
+    assertThat(score).isZero();
   }
 
   @Test
@@ -180,6 +179,6 @@ class ApplicationTests {
     var title = documentContext.read("$.title");
     var questions = (List<?>) documentContext.read("$.questions");
     assertThat(title).isEqualTo("Create quiz test");
-    assertThat(questions.size()).isEqualTo(1);
+    assertThat(questions).hasSize(1);
   }
 }

@@ -1,7 +1,6 @@
 package com.example.wuiz.result;
 
 import com.example.wuiz.quiz.Quiz;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,8 +22,7 @@ public class Result {
   // TODO(wralith): Just an integer for now, There can be replication of quiz with mistakes and
   // correct answers marked
   /** Quiz result point over 100 */
-  @Builder.Default
-  private int score = 0;
+  @Builder.Default private int score = 0;
 
   @OneToOne private Quiz quiz;
 
